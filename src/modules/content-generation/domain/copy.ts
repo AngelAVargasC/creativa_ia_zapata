@@ -1,0 +1,65 @@
+/**
+ * Dominio puro de generacion de copy. Sin IO, sin framework: solo reglas de
+ * negocio y construccion de prompt. 100% testeable de forma aislada.
+ */
+export type Platform = 'facebook' | 'instagram';
+export type Tone = 'cercano' | 'profesional' | 'divertido' | 'inspirador';
+
+/** Perfil de marca del tenant (agencia), sobre los lineamientos del Grupo. */
+export interface BrandProfile {
+  readonly agencyName: string;
+  /** Lineamientos de voz/estilo de la marca. */
+  readonly voice: string;
+  /** Palabras o frases prohibidas por la marca. */
+  readonly bannedWords: readonly string[];
+}
+
+export interface CopyBrief {
+  readonly platform: Platform;
+  readonly objective: string;
+  readonly tone: Tone;
+  readonly product: string;
+  readonly maxChars: number;
+}
+
+const platformLabel: Record<Platform, string> = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+};
+
+/** Construye el (system, prompt) a partir de la marca y el brief. Determinista. */
+export const buildCopyPrompt = (brand: BrandProfile, brief: CopyBrief): { system: string; prompt: string } => {
+  const banned =
+    brand.bannedWords.length > 0
+      ? `Nunca uses estas palabras o frases: ${brand.bannedWords.join(', ')}.`
+      : '';
+
+  const system = [
+    `Eres redactor publicitario de la agencia "${brand.agencyName}".`,
+    `Voz de marca: ${brand.voice}.`,
+    `Escribes copy para redes sociales en espanol, listo para publicar.`,
+    banned,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const prompt = [
+    `Plataforma: ${platformLabel[brief.platform]}.`,
+    `Producto/servicio: ${brief.product}.`,
+    `Objetivo de la pieza: ${brief.objective}.`,
+    `Tono: ${brief.tone}.`,
+    `Limite estricto: maximo ${brief.maxChars} caracteres.`,
+    `Devuelve solo el texto del copy, sin comillas ni explicaciones.`,
+  ].join('\n');
+
+  return { system, prompt };
+};
+
+/**
+ * Verifica que el texto generado respete los lineamientos de marca.
+ * Devuelve la lista de palabras prohibidas encontradas (vacia = cumple).
+ */
+export const findBrandViolations = (brand: BrandProfile, text: string): readonly string[] => {
+  const haystack = text.toLowerCase();
+  return brand.bannedWords.filter((word) => word.trim().length > 0 && haystack.includes(word.toLowerCase()));
+};
