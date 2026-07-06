@@ -23,7 +23,7 @@ export const resolveTenant = async (): Promise<Result<TenantContext, AppError>> 
       return err(new AppError('TENANT_FORBIDDEN', 'El usuario no tiene un tenant valido'));
     }
 
-    return ok({ tenantId: parsed.data, userId: data.user.id });
+    return ok({ tenantId: parsed.data, userId: data.user.id, email: data.user.email });
   } catch (e) {
     // Falla cerrada: si no podemos verificar identidad, denegamos.
     return err(new AppError('TENANT_FORBIDDEN', 'No se pudo verificar la sesion', e));

@@ -3,7 +3,7 @@ import type { TenantContext } from '@/core/tenant';
 import { AppError } from '@/core/errors';
 import { ok, err, type Result } from '@/core/result';
 import type { LanguageModelPort, UsageInfo } from '@/ai/ports';
-import { buildCopyPrompt, findBrandViolations, type BrandProfile, type CopyBrief } from './copy';
+import { buildCopyPrompt, findBrandViolations, tokenBudgetFor, type BrandProfile, type CopyBrief } from './copy';
 
 export interface GenerateCopyDeps {
   readonly model: LanguageModelPort;
@@ -35,8 +35,8 @@ export const generateCopy = async (
     task: 'copy',
     system,
     prompt,
-    temperature: 0.7,
-    maxOutputTokens: 512,
+    temperature: 0.85,
+    maxOutputTokens: tokenBudgetFor(input.brief.maxChars),
   });
 
   if (!generated.ok) return generated;

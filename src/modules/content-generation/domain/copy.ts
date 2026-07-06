@@ -27,6 +27,19 @@ const platformLabel: Record<Platform, string> = {
   instagram: 'Instagram',
 };
 
+const platformGuidance: Record<Platform, string> = {
+  instagram:
+    'Instagram: lenguaje visual y cercano; gancho fuerte arriba; puedes usar 1-3 emojis con intención y cerrar con 3-5 hashtags específicos (nada genérico).',
+  facebook:
+    'Facebook: frases algo más desarrolladas y conversacionales; 0-2 emojis; sin hashtags; remata con una llamada a la acción clara.',
+};
+
+/**
+ * Presupuesto de tokens de salida en función del límite de caracteres pedido.
+ * Generoso (con holgura) para que el copy nunca se corte a media frase.
+ */
+export const tokenBudgetFor = (maxChars: number): number => Math.min(4096, Math.ceil(maxChars / 2) + 600);
+
 /** Construye el (system, prompt) a partir de la marca y el brief. Determinista. */
 export const buildCopyPrompt = (brand: BrandProfile, brief: CopyBrief): { system: string; prompt: string } => {
   const banned =
@@ -35,9 +48,10 @@ export const buildCopyPrompt = (brand: BrandProfile, brief: CopyBrief): { system
       : '';
 
   const system = [
-    `Eres redactor publicitario de la agencia "${brand.agencyName}".`,
+    `Eres un redactor publicitario senior de la agencia "${brand.agencyName}", experto en social media de alto rendimiento.`,
     `Voz de marca: ${brand.voice}.`,
-    `Escribes copy para redes sociales en espanol, listo para publicar.`,
+    `Escribes copy en español que detiene el scroll: un gancho potente en la primera línea, una idea clara, beneficio concreto, emoción real y una llamada a la acción que invita a actuar.`,
+    `Nada de relleno corporativo ni clichés vacíos ("descubre la excelencia", "somos líderes", "lo mejor en…", "presentamos nuestro más reciente"). Sé específico, fresco, con ritmo y personalidad.`,
     banned,
   ]
     .filter(Boolean)
@@ -45,11 +59,12 @@ export const buildCopyPrompt = (brand: BrandProfile, brief: CopyBrief): { system
 
   const prompt = [
     `Plataforma: ${platformLabel[brief.platform]}.`,
+    platformGuidance[brief.platform],
     `Producto/servicio: ${brief.product}.`,
     `Objetivo de la pieza: ${brief.objective}.`,
     `Tono: ${brief.tone}.`,
-    `Limite estricto: maximo ${brief.maxChars} caracteres.`,
-    `Devuelve solo el texto del copy, sin comillas ni explicaciones.`,
+    `Aprovecha hasta ${brief.maxChars} caracteres sin pasarte; prioriza impacto sobre longitud, pero entrega una pieza completa (nunca la dejes a medias).`,
+    `Devuelve SOLO el texto del copy listo para publicar, sin comillas, sin etiquetas ni explicaciones.`,
   ].join('\n');
 
   return { system, prompt };

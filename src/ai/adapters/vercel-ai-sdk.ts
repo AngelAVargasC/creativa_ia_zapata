@@ -38,6 +38,12 @@ const readTokens = (
 export const createVercelAiModel = (deps: AdapterDeps): LanguageModelPort => {
   const { env, usage, logger } = deps;
 
+  // Gemini 2.5 "piensa" antes de responder y ese razonamiento consume el
+  // presupuesto de tokens, lo que truncaba el texto a media frase. Para copy lo
+  // desactivamos: todo el presupuesto va al texto y el streaming arranca al instante.
+  const providerOptionsFor = (provider: ModelChoice['provider']) =>
+    provider === 'google' ? { google: { thinkingConfig: { thinkingBudget: 0 } } } : undefined;
+
   const resolve = (choice: ModelChoice): LanguageModelV1 => {
     switch (choice.provider) {
       case 'anthropic': {
@@ -73,6 +79,7 @@ export const createVercelAiModel = (deps: AdapterDeps): LanguageModelPort => {
           prompt: req.prompt,
           temperature: req.temperature,
           maxTokens: req.maxOutputTokens,
+          providerOptions: providerOptionsFor(choice.provider),
         });
         const tokens = readTokens(result.usage);
         const usageInfo: UsageInfo = {
@@ -102,6 +109,7 @@ export const createVercelAiModel = (deps: AdapterDeps): LanguageModelPort => {
           prompt: req.prompt,
           temperature: req.temperature,
           maxTokens: req.maxOutputTokens,
+          providerOptions: providerOptionsFor(choice.provider),
           onFinish: (event) => {
             const tokens = readTokens(event.usage);
             usage.record(

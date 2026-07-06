@@ -11,4 +11,5 @@ export type TenantId = z.infer<typeof tenantIdSchema>;
 export interface TenantContext {
   readonly tenantId: TenantId;
   readonly userId: string;
+  readonly email?: string;
 }

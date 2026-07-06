@@ -6,7 +6,7 @@ import { ok, err, type Result } from '@/core/result';
 import type { TenantContext } from '@/core/tenant';
 import { createVercelAiModel } from '@/ai/adapters/vercel-ai-sdk';
 import { createLogUsageRecorder } from '@/ai/usage';
-import { buildCopyPrompt, type BrandProfile, type CopyBrief } from '../domain/copy';
+import { buildCopyPrompt, tokenBudgetFor, type BrandProfile, type CopyBrief } from '../domain/copy';
 import { generateCopy, type GeneratedCopy } from '../domain/generate-copy';
 
 export interface CopyServiceInput {
@@ -35,7 +35,13 @@ export const streamGenerateCopy = async (
 ): Promise<Result<ReadableStream<Uint8Array>, AppError>> => {
   const { model } = buildModel(input.tenant);
   const { system, prompt } = buildCopyPrompt(input.brand, input.brief);
-  const res = await model.stream({ task: 'copy', system, prompt, temperature: 0.7, maxOutputTokens: 512 });
+  const res = await model.stream({
+    task: 'copy',
+    system,
+    prompt,
+    temperature: 0.85,
+    maxOutputTokens: tokenBudgetFor(input.brief.maxChars),
+  });
   if (!res.ok) return err(res.error);
   return ok(res.value);
 };

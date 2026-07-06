@@ -70,6 +70,32 @@ npm run test                 # vitest (offline, deterministas)
 npm run dev                  # http://localhost:3000
 ```
 
+### Auth y seeding de tenants
+
+```bash
+# 1) Aplica las migraciones en tu Supabase (SQL editor o supabase CLI), en orden:
+#    supabase/migrations/0001_init_tenants_rls.sql   (tablas + RLS)
+#    supabase/migrations/0002_grants.sql             (privilegios de tabla)
+# 2) En .env.local pon la llave SERVICE_ROLE (no la anon) en SUPABASE_SERVICE_ROLE_KEY.
+# 3) Crea 2 tenants de prueba + 1 usuario por agencia (idempotente):
+npm run seed        # node --env-file=.env.local scripts/seed.mts
+```
+
+> `permission denied for table ...` al sembrar = la llave no es `service_role`, o
+> falta aplicar `0002_grants.sql`. El seed verifica el rol de la llave y avisa.
+
+- **Login**: página `/login` (email/contraseña) → server action `login` (Zod en el borde) → cookie de sesión.
+- **Middleware** (`src/middleware.ts`): refresca la sesión de Supabase en cada request.
+- El **tenant** se resuelve siempre en el servidor desde `app_metadata.tenant_id` del JWT (`resolveTenant`). Con sesión válida, `POST /api/generate/copy` deja de devolver 401.
+
+### Prueba de aislamiento RLS
+
+`src/db/__tests__/rls-isolation.test.ts` (end-to-end): inicia sesión como usuario de Agencia A y B y verifica que **ninguno** puede leer ni escribir datos del otro tenant. Se **salta** si Supabase no está configurado; cuando lo está, **falla** si el aislamiento se rompe.
+
+```bash
+node --env-file=.env.local node_modules/.bin/vitest run src/db/__tests__/rls-isolation.test.ts
+```
+
 ### Endpoint
 
 `POST /api/generate/copy` — requiere sesión autenticada con tenant.
