@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import type { Route } from 'next';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { LogoMark } from '@/components/shell/icons';
 import { login } from './actions';
@@ -73,6 +75,13 @@ export default async function LoginPage({
             </label>
             <SubmitButton />
           </form>
+
+          <p className={styles.formSub} style={{ marginTop: 'var(--space-5)' }}>
+            ¿Tu agencia aún no tiene cuenta?{' '}
+            <Link href={'/registro' as Route} className={styles.link}>
+              Regístrala aquí
+            </Link>
+          </p>
         </div>
       </main>
     </div>

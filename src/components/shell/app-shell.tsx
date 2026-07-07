@@ -3,12 +3,13 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
+import type { AppRole } from '@/core/tenant';
 import { Sidebar } from './sidebar';
 import { LogoMark, MenuIcon } from './icons';
 import styles from './shell.module.css';
 
 interface AppShellProps {
-  readonly user: { readonly email?: string; readonly tenantId: string };
+  readonly user: { readonly email?: string; readonly role: AppRole; readonly tenantId?: string };
   readonly children: ReactNode;
 }
 

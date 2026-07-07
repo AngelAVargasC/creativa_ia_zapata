@@ -5,16 +5,20 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, type Variants } from 'framer-motion';
+import type { AppRole } from '@/core/tenant';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { logout } from '@/app/login/actions';
 import {
   BuildingIcon,
   ChevronLeftIcon,
+  ClipboardIcon,
   DeckIcon,
   LibraryIcon,
   LogoMark,
   LogoutIcon,
+  PlusIcon,
   SparklesIcon,
+  UsersIcon,
 } from './icons';
 import styles from './shell.module.css';
 
@@ -28,22 +32,56 @@ interface NavGroup {
   readonly items: readonly NavItem[];
 }
 
-const NAV: readonly NavGroup[] = [
-  {
-    label: 'Crear',
-    items: [
-      { label: 'Generar contenido', href: '/generar', icon: <SparklesIcon /> },
-      { label: 'Propuestas', href: '/propuestas', icon: <DeckIcon /> },
-    ],
-  },
-  {
-    label: 'Gestión',
-    items: [
-      { label: 'Biblioteca', href: '/biblioteca', icon: <LibraryIcon /> },
-      { label: 'Agencias y marcas', href: '/agencias', icon: <BuildingIcon /> },
-    ],
-  },
-];
+const ROLE_LABEL: Record<AppRole, string> = {
+  admin: 'Administrador',
+  operador: 'Operador',
+  solicitante: 'Agencia',
+};
+
+/** Navegacion segun rol: la agencia solo ve sus solicitudes; el staff gestiona. */
+const navFor = (role: AppRole): readonly NavGroup[] => {
+  if (role === 'solicitante') {
+    return [
+      {
+        label: 'Solicitudes',
+        items: [
+          { label: 'Mis solicitudes', href: '/solicitudes', icon: <ClipboardIcon /> },
+          { label: 'Nueva solicitud', href: '/solicitudes/nueva', icon: <PlusIcon /> },
+        ],
+      },
+    ];
+  }
+
+  const groups: NavGroup[] = [
+    {
+      label: 'Operación',
+      items: [{ label: 'Solicitudes', href: '/solicitudes', icon: <ClipboardIcon /> }],
+    },
+    {
+      label: 'Crear',
+      items: [
+        { label: 'Generar contenido', href: '/generar', icon: <SparklesIcon /> },
+        { label: 'Propuestas', href: '/propuestas', icon: <DeckIcon /> },
+      ],
+    },
+    {
+      label: 'Gestión',
+      items: [
+        { label: 'Biblioteca', href: '/biblioteca', icon: <LibraryIcon /> },
+        { label: 'Agencias y marcas', href: '/agencias', icon: <BuildingIcon /> },
+      ],
+    },
+  ];
+
+  if (role === 'admin') {
+    groups.push({
+      label: 'Administración',
+      items: [{ label: 'Operadores', href: '/admin/operadores', icon: <UsersIcon /> }],
+    });
+  }
+
+  return groups;
+};
 
 const container: Variants = {
   hidden: {},
@@ -57,7 +95,7 @@ const itemVariant: Variants = {
 const initials = (email?: string): string => (email ? email.slice(0, 2).toUpperCase() : '··');
 
 interface SidebarProps {
-  readonly user: { readonly email?: string; readonly tenantId: string };
+  readonly user: { readonly email?: string; readonly role: AppRole; readonly tenantId?: string };
   readonly collapsed: boolean;
   readonly mobileOpen: boolean;
   readonly onToggleCollapse: () => void;
@@ -65,6 +103,7 @@ interface SidebarProps {
 
 export const Sidebar = ({ user, collapsed, mobileOpen, onToggleCollapse }: SidebarProps) => {
   const pathname = usePathname();
+  const nav = navFor(user.role);
 
   return (
     <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`} data-open={mobileOpen}>
@@ -84,7 +123,7 @@ export const Sidebar = ({ user, collapsed, mobileOpen, onToggleCollapse }: Sideb
       </div>
 
       <motion.nav className={styles.nav} variants={container} initial="hidden" animate="show">
-        {NAV.map((group) => (
+        {nav.map((group) => (
           <div className={styles.navGroup} key={group.label}>
             <p className={styles.navGroupLabel}>{group.label}</p>
             {group.items.map((item) => {
@@ -115,7 +154,7 @@ export const Sidebar = ({ user, collapsed, mobileOpen, onToggleCollapse }: Sideb
             </span>
             <span className={styles.userMeta}>
               <span className={styles.userEmail}>{user.email ?? 'Sesión activa'}</span>
-              <span className={styles.userTenant}>tenant {user.tenantId.slice(0, 8)}</span>
+              <span className={styles.userTenant}>{ROLE_LABEL[user.role]}</span>
             </span>
           </div>
           <ThemeToggle />

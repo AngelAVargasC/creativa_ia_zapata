@@ -66,6 +66,20 @@ export const PlusIcon = ({ size = 16 }: IconProps) => (
   </svg>
 );
 
+export const ClipboardIcon = ({ size = 18 }: IconProps) => (
+  <svg {...base(size)}>
+    <rect x="5" y="4" width="14" height="17" rx="2" />
+    <path d="M9 4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1H9V4ZM9 11h6M9 15h4" />
+  </svg>
+);
+
+export const UsersIcon = ({ size = 18 }: IconProps) => (
+  <svg {...base(size)}>
+    <circle cx="9" cy="8" r="3" />
+    <path d="M3.5 20a5.5 5.5 0 0 1 11 0M16 6.5a3 3 0 0 1 0 5.5M17 20a5.5 5.5 0 0 0-2.5-4.6" />
+  </svg>
+);
+
 /** Marca / logo (cuadro con destello). */
 export const LogoMark = ({ size = 22 }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">

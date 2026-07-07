@@ -1,0 +1,135 @@
+.formCard {
+  max-width: 720px;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.notice {
+  border-radius: var(--radius);
+  padding: 0.6rem 0.75rem;
+  font-size: var(--text-md);
+  border: 1px solid transparent;
+}
+.noticeError {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 32%, transparent);
+}
+.noticeOk {
+  color: #16a34a;
+  background: color-mix(in srgb, #16a34a 12%, transparent);
+  border-color: color-mix(in srgb, #16a34a 32%, transparent);
+}
+
+/* ── Detalle ── */
+.detailGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.panel {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.panelTitle {
+  font-size: var(--text-lg);
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.dl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.dl dt {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  margin-bottom: 0.2rem;
+}
+.dl dd {
+  margin: 0;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── Bitacora ── */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.event {
+  position: relative;
+  padding-left: var(--space-5);
+  border-left: 1px solid var(--border);
+  padding-bottom: var(--space-2);
+}
+.event::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+.eventHead {
+  font-size: var(--text-sm);
+  color: var(--text);
+}
+.eventMeta {
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  margin-top: 0.15rem;
+}
+.eventDiff {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+}
+.eventDiff .old {
+  text-decoration: line-through;
+  color: var(--text-faint);
+}
+
+@media (max-width: 900px) {
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+  .row {
+    grid-template-columns: 1fr;
+  }
+}
