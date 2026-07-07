@@ -219,6 +219,17 @@
   opacity: 0;
 }
 
+/* Header colapsado: sin logo, flecha centrada en el eje de los iconos (36px) */
+.collapsed .sidebarHeader {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.collapsed .logo {
+  display: none;
+}
+
 .collapsed .navGroupLabel {
   max-height: 0;
   opacity: 0;
