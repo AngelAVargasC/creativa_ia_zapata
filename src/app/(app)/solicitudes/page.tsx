@@ -11,12 +11,27 @@ import { ClipboardIcon, PlusIcon } from '@/components/shell/icons';
 import { StatusBadge } from '@/components/solicitudes/status-badge';
 import shell from '@/components/shell/shell.module.css';
 
-export default async function SolicitudesPage() {
+export default async function SolicitudesPage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<{ q?: string }>;
+}) {
   const session = await resolveSession();
   const staff = session.ok && isStaffRole(session.value.role);
 
+  const { q } = await searchParams;
+  const query = (q ?? '').trim().toLowerCase();
+
   const res = await listSolicitudes();
-  const rows = res.ok ? res.value : [];
+  const all = res.ok ? res.value : [];
+  const rows = query
+    ? all.filter((s) =>
+        [s.agencia_nombre, s.tipo_contenido, s.pauta_o_feed ?? '', s.descripcion ?? '']
+          .join(' ')
+          .toLowerCase()
+          .includes(query),
+      )
+    : all;
 
   const nueva = (
     <Link className="btn btn-primary" href={'/solicitudes/nueva' as Route}>
@@ -71,17 +86,21 @@ export default async function SolicitudesPage() {
                     <tr key={s.id}>
                       {staff && (
                         <td>
-                          <Link href={`/solicitudes/${s.id}` as Route}>{s.agencia_nombre}</Link>
+                          <Link className="cell-chip" href={`/solicitudes/${s.id}` as Route}>
+                            {s.agencia_nombre}
+                          </Link>
                         </td>
                       )}
                       <td>
-                        <Link href={`/solicitudes/${s.id}` as Route}>{s.tipo_contenido}</Link>
+                        <Link className="cell-title" href={`/solicitudes/${s.id}` as Route}>
+                          {s.tipo_contenido}
+                        </Link>
                       </td>
                       <td>{s.pauta_o_feed ? (s.pauta_o_feed === 'pauta' ? 'Pauta' : 'Feed') : '—'}</td>
                       <td>
                         <StatusBadge status={s.status} />
                       </td>
-                      <td>{formatDate(s.updated_at)}</td>
+                      <td className="cell-muted">{formatDate(s.updated_at)}</td>
                       <td>
                         {s.link_final ? (
                           <a href={s.link_final} target="_blank" rel="noreferrer noopener">

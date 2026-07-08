@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
-import { LogoMark } from '@/components/shell/icons';
-import { login } from './actions';
-import { SubmitButton } from './submit-button';
+import { ArrowRightIcon } from '@/components/shell/icons';
+import { LoginForm } from './login-form';
 import styles from './login.module.css';
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -21,67 +20,88 @@ export default async function LoginPage({
 
   return (
     <div className={styles.split}>
+      {/* Fondo inmersivo continuo a pantalla completa (sin divisor) */}
+      <div className={styles.aurora} aria-hidden="true">
+        <span className={styles.orb1} />
+        <span className={styles.orb2} />
+        <span className={styles.orb3} />
+        <span className={styles.orb4} />
+        <span className={styles.orb5} />
+      </div>
+      <span className={styles.grid} aria-hidden="true" />
+      <span className={styles.grain} aria-hidden="true" />
+
+      <div className={styles.themeToggleFloat}>
+        <ThemeToggle />
+      </div>
+
       <aside className={styles.brand}>
-        <span className={styles.grain} aria-hidden="true" />
         <div className={styles.brandInner}>
-          <div className={styles.brandLogo}>
-            <LogoMark size={26} />
-            Creatiba
+          <div className={styles.lockup}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/logo_creatiba.png" alt="Creatiba" className={styles.logoCreatiba} />
+            <span className={styles.lockupX} aria-hidden="true">
+              ×
+            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/logo-zapata-white.png" alt="Grupo Zapata" className={styles.logoZapata} />
           </div>
+
           <div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/media/creatiba-studio-wordmark.png"
+              alt="Creatiba Studio"
+              className={styles.brandWordmark}
+            />
             <h1 className={styles.headline}>
               Tu marca,
               <br />
-              multiplicada por IA.
+              multiplicada por <span className={styles.headlineAccent}>IA</span>.
             </h1>
             <p className={styles.brandSub}>
-              Genera copies, guiones y propuestas para las 52 agencias del Grupo. La IA produce; tú revisas, apruebas
-              y publicas.
+              Del brief al post en minutos. Contenido creativo a escala para las 52 agencias del Grupo — tú solo
+              revisas y publicas.
             </p>
           </div>
-          <p className={styles.brandFoot}>GRUPO ZAPATA · PLATAFORMA CREATIVA IA</p>
+
+          <p className={styles.brandFoot}>
+            <span className={styles.footDot} aria-hidden="true" />
+            Una alianza Creatiba × Grupo Zapata
+          </p>
         </div>
       </aside>
 
       <main className={styles.formSide}>
-        <div className={styles.formTop}>
-          <ThemeToggle />
-        </div>
-        <div className={styles.formInner}>
-          <h2 className={styles.formTitle}>Iniciar sesión</h2>
-          <p className={styles.formSub}>Accede a tu espacio de trabajo.</p>
+        <span className={styles.formGlow} aria-hidden="true" />
+        <div className={styles.card}>
+          <span className={styles.cardSheen} aria-hidden="true" />
+          <div className={styles.formInner}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/media/creatiba-studio-wordmark.png"
+              alt="Creatiba Studio"
+              className={styles.cardWordmark}
+            />
+            <h2 className={styles.formTitle}>Iniciar sesión</h2>
+            <p className={styles.formSub}>Accede a tu espacio de trabajo.</p>
 
-          {message && (
-            <p role="alert" className={styles.error}>
-              {message}
+            {message && (
+              <p role="alert" className={styles.error}>
+                {message}
+              </p>
+            )}
+
+            <LoginForm />
+
+            <p className={styles.formSub} style={{ marginTop: 'var(--space-5)' }}>
+              ¿Tu agencia aún no tiene cuenta?{' '}
+              <Link href={'/registro' as Route} className={styles.link}>
+                Regístrala aquí
+                <ArrowRightIcon size={15} />
+              </Link>
             </p>
-          )}
-
-          <form action={login} className={styles.form}>
-            <label className="field">
-              <span className="field-label">Email</span>
-              <input className="input" name="email" type="email" autoComplete="email" required />
-            </label>
-            <label className="field">
-              <span className="field-label">Contraseña</span>
-              <input
-                className="input"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                minLength={8}
-              />
-            </label>
-            <SubmitButton />
-          </form>
-
-          <p className={styles.formSub} style={{ marginTop: 'var(--space-5)' }}>
-            ¿Tu agencia aún no tiene cuenta?{' '}
-            <Link href={'/registro' as Route} className={styles.link}>
-              Regístrala aquí
-            </Link>
-          </p>
+          </div>
         </div>
       </main>
     </div>

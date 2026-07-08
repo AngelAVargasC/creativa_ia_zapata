@@ -152,6 +152,30 @@ code {
   background: var(--accent-soft);
 }
 
+/* Scrollbars finos y elegantes, coherentes con el tema */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  transition: background-color var(--dur) var(--ease);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-faint);
+  background-clip: padding-box;
+}
+
 /* ── Primitivos reutilizables ── */
 .btn {
   display: inline-flex;
@@ -169,7 +193,8 @@ code {
   cursor: pointer;
   white-space: nowrap;
   transition: background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease),
-    color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+    color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
 }
 
 .btn:disabled {
@@ -177,20 +202,28 @@ code {
   opacity: 0.55;
 }
 
+.btn svg {
+  flex-shrink: 0;
+}
+
 .btn-primary {
   background: var(--accent);
   color: var(--accent-contrast);
   border-color: var(--accent);
   font-weight: 600;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 32%, transparent);
 }
 
 .btn-primary:active:not(:disabled) {
-  transform: translateY(0.5px);
+  transform: translateY(0);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .btn-ghost {
@@ -201,6 +234,12 @@ code {
 
 .btn-ghost:hover:not(:disabled) {
   background: var(--surface-3);
+  border-color: var(--text-faint);
+  transform: translateY(-1px);
+}
+
+.btn-ghost:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .icon-btn {
@@ -215,17 +254,34 @@ code {
   color: var(--text);
   cursor: pointer;
   transition: background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease),
-    color var(--dur-fast) var(--ease);
+    color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
 }
 
 .icon-btn:hover {
   background: var(--surface-3);
+  border-color: var(--text-faint);
+}
+
+.icon-btn:active {
+  transform: scale(0.94);
 }
 
 .card {
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+}
+
+/* Modificador opt-in: tarjeta interactiva (clicable) con elevación al hover */
+.card-interactive {
+  cursor: pointer;
+}
+.card-interactive:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .field {
@@ -271,6 +327,12 @@ code {
   color: var(--text-faint);
 }
 
+.input:hover:not(:focus),
+.textarea:hover:not(:focus),
+.select:hover:not(:focus) {
+  border-color: var(--border-strong);
+}
+
 .input:focus,
 .textarea:focus,
 .select:focus {
@@ -314,38 +376,90 @@ code {
   color: var(--text);
 }
 
-/* ── Badge / chip de estatus (tono via data-tone) ── */
+/* ── Badge / chip de estatus tipo semáforo (tono via data-tone) ──
+   Punto de color a la izquierda + fondo tenue del mismo tono → lectura rápida. */
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   font-size: var(--text-xs);
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1;
-  padding: 0.28rem 0.55rem;
+  padding: 0.3rem 0.6rem 0.3rem 0.55rem;
   border-radius: var(--radius-pill);
   border: 1px solid var(--border-strong);
   color: var(--text-muted);
   background: var(--surface-2);
   white-space: nowrap;
 }
+/* El punto semáforo hereda el color del tono (currentColor). */
+.badge::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 22%, transparent);
+}
 .badge[data-tone='ok'] {
   color: #16a34a;
-  border-color: color-mix(in srgb, #16a34a 34%, transparent);
-  background: color-mix(in srgb, #16a34a 12%, transparent);
+  border-color: color-mix(in srgb, #16a34a 40%, transparent);
+  background: color-mix(in srgb, #16a34a 14%, transparent);
 }
 .badge[data-tone='info'] {
   color: #2563eb;
-  border-color: color-mix(in srgb, #2563eb 34%, transparent);
-  background: color-mix(in srgb, #2563eb 12%, transparent);
+  border-color: color-mix(in srgb, #2563eb 40%, transparent);
+  background: color-mix(in srgb, #2563eb 14%, transparent);
 }
 .badge[data-tone='warn'] {
   color: #d97706;
-  border-color: color-mix(in srgb, #d97706 36%, transparent);
-  background: color-mix(in srgb, #d97706 13%, transparent);
+  border-color: color-mix(in srgb, #d97706 42%, transparent);
+  background: color-mix(in srgb, #d97706 15%, transparent);
+}
+.badge[data-tone='danger'] {
+  color: #dc2626;
+  border-color: color-mix(in srgb, #dc2626 42%, transparent);
+  background: color-mix(in srgb, #dc2626 14%, transparent);
+}
+.badge[data-tone='neutral'] {
+  color: var(--text-muted);
+  border-color: var(--border-strong);
+  background: var(--surface-2);
 }
 .badge[data-tone='muted'] {
   color: var(--text-faint);
+  background: var(--surface-2);
+}
+
+/* ── Chip de agencia (resalta, SIN semáforo) ── */
+.cell-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: var(--text-md);
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.32rem 0.6rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* Título destacado en tablas */
+.cell-title {
+  font-weight: 600;
+  color: var(--text);
+}
+.cell-title:hover {
+  color: var(--accent);
+}
+/* Dato secundario (fechas, metadatos) */
+.cell-muted {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Tabla de datos ── */
@@ -380,6 +494,9 @@ code {
 }
 .table tbody tr {
   transition: background-color var(--dur-fast) var(--ease);
+}
+.table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--surface-2) 45%, transparent);
 }
 .table tbody tr:hover {
   background: var(--surface-2);

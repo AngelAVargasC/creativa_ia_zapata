@@ -2,6 +2,9 @@
   display: flex;
   height: 100dvh;
   overflow: hidden;
+  /* Radio global de la app interna: máximo 8px en cards/paneles/contenedores.
+     (El login queda fuera del shell, así que conserva su radio propio.) */
+  --radius-lg: 8px;
 }
 
 /* ── Sidebar ── */
@@ -45,6 +48,29 @@
   overflow: hidden;
   white-space: nowrap;
   transition: max-width var(--dur) var(--ease), opacity var(--dur-fast) var(--ease);
+}
+
+/* Wordmark Creatiba Studio: negro por defecto → se invierte a blanco en oscuro */
+.logoImg {
+  display: block;
+  height: 20px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+:global([data-theme='light']) .logoImg {
+  filter: none;
+}
+
+.mobileLogo {
+  display: block;
+  height: 18px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+:global([data-theme='light']) .mobileLogo {
+  filter: none;
 }
 
 .collapseBtn {
@@ -122,15 +148,43 @@
     padding var(--dur) var(--ease);
 }
 
+/* Indicador de item activo: barra de acento que crece suavemente */
+.navItem::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  width: 3px;
+  height: 17px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  transform: translateY(-50%) scaleY(0);
+  opacity: 0;
+  transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+
 .navItem:hover {
   background: var(--surface-2);
   color: var(--text);
 }
 
+.navItem:hover .navIcon {
+  transform: translateX(1px);
+}
+
 .navItemActive,
 .navItemActive:hover {
-  background: var(--accent-soft);
+  background: transparent;
   color: var(--accent);
+}
+
+.navItemActive::before {
+  transform: translateY(-50%) scaleY(1);
+  opacity: 1;
+}
+
+.collapsed .navItem::before {
+  opacity: 0;
 }
 
 .navIcon {
@@ -139,6 +193,7 @@
   justify-content: center;
   width: 18px;
   flex-shrink: 0;
+  transition: transform var(--dur-fast) var(--ease);
 }
 
 .navLabel {
@@ -269,6 +324,166 @@
   overflow: hidden;
 }
 
+/* ── Topbar del contenido: buscador + notificaciones ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 60px;
+  flex-shrink: 0;
+  padding: 0 var(--space-6);
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+}
+
+.topbarMenu {
+  display: none;
+}
+
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 520px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  display: inline-flex;
+  color: var(--text-faint);
+  pointer-events: none;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.search:focus-within .searchIcon {
+  color: var(--accent);
+}
+
+.searchInput {
+  width: 100%;
+  height: 38px;
+  font: inherit;
+  font-size: var(--text-md);
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 0 2.4rem 0 2.4rem;
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
+}
+
+.searchInput::placeholder {
+  color: var(--text-faint);
+}
+
+.searchInput:hover:not(:focus) {
+  border-color: var(--border-strong);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ring);
+  background: var(--surface-1);
+}
+
+.searchKbd {
+  position: absolute;
+  right: 0.55rem;
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.searchInput:focus ~ .searchKbd {
+  color: var(--accent);
+}
+
+.topbarActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.notifWrap {
+  position: relative;
+}
+
+.notifScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.notifPanel {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 300px;
+  transform-origin: top right;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.notifHead {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+
+.notifEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-1);
+  padding: var(--space-6) var(--space-5);
+}
+
+.notifEmptyIcon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.notifEmptyTitle {
+  font-weight: 600;
+  font-size: var(--text-md);
+}
+
+.notifEmptyDesc {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  max-width: 32ch;
+}
+
 .mobileBar {
   display: none;
 }
@@ -290,23 +505,23 @@
 /* ── Page header / empty state ── */
 .pageHeader {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-6) var(--space-6) var(--space-5);
+  padding: var(--space-3) var(--space-6);
   border-bottom: 1px solid var(--border);
 }
 
 .pageTitle {
-  font-size: var(--text-2xl);
+  font-size: var(--text-xl);
   letter-spacing: var(--tracking-tight);
 }
 
 .pageDesc {
-  margin-top: var(--space-2);
+  margin-top: 1px;
   color: var(--text-muted);
-  font-size: var(--text-md);
-  max-width: 60ch;
+  font-size: var(--text-sm);
+  max-width: 70ch;
 }
 
 .pageActions {
@@ -376,6 +591,19 @@
     display: none;
   }
 
+  .topbar {
+    padding: 0 var(--space-4);
+    height: 56px;
+  }
+
+  .topbarMenu {
+    display: inline-flex;
+  }
+
+  .searchKbd {
+    display: none;
+  }
+
   .mobileBar {
     display: flex;
     align-items: center;
@@ -403,8 +631,10 @@
   }
 
   .pageHeader {
-    padding: var(--space-5) var(--space-4) var(--space-4);
+    padding: var(--space-3) var(--space-4);
     flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
   }
 
   .pageBody {

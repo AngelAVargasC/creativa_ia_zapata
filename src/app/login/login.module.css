@@ -1,28 +1,199 @@
 .split {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
-  /* 70% panel de marca · 30% formulario */
+  /* 70% marca · 30% formulario, sin divisor: el fondo es continuo */
   grid-template-columns: 70% 30%;
   min-height: 100dvh;
+
+  /* ── Tokens locales del login (variante OSCURA por defecto) ── */
+  --lg-bg:
+    linear-gradient(100deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.22) 42%, rgba(0, 0, 0, 0) 66%),
+    url('/media/fondos%20login/fondo-dark.png') center / cover no-repeat;
+  --lg-text: #ffffff;
+  --lg-text-muted: #a1a1a1;
+  --lg-text-faint: #8a8a8a;
+  --lg-orb-a: rgba(251, 67, 57, 0.7);
+  --lg-orb-b: rgba(196, 24, 40, 0.55);
+  --lg-orb-c: rgba(124, 22, 74, 0.5);
+  --lg-orb-d: rgba(214, 34, 44, 0.42);
+  --lg-orb-e: rgba(180, 20, 48, 0.34);
+  --lg-grid: rgba(255, 255, 255, 0.035);
+  --lg-card-bg: linear-gradient(160deg, #171719 0%, #0d0d0f 100%);
+  --lg-card-border: rgba(255, 255, 255, 0.1);
+  --lg-card-shadow: 0 30px 80px -24px rgba(0, 0, 0, 0.8), 0 2px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  --lg-sheen: rgba(255, 255, 255, 0.14);
+  --lg-input-bg: rgba(255, 255, 255, 0.04);
+  --lg-input-border: rgba(255, 255, 255, 0.12);
+  --lg-input-bg-focus: rgba(255, 255, 255, 0.06);
+  --lg-lockup-x: rgba(255, 255, 255, 0.4);
+  --lg-glow: rgba(251, 67, 57, 0.22);
+  --lg-logo-filter: none;
+  /* wordmark Creatiba Studio: artwork NEGRO → se invierte a blanco en oscuro */
+  --lg-wordmark-filter: brightness(0) invert(1);
+
+  background: var(--lg-bg);
 }
 
-/* ── Panel de marca (siempre oscuro, independiente del tema) ── */
+/* ── Variante CLARA: fondo claro con toques rojos suaves ── */
+:global([data-theme='light']) .split {
+  --lg-bg:
+    linear-gradient(100deg, rgba(255, 255, 255, 0.66) 0%, rgba(255, 255, 255, 0.26) 44%, rgba(255, 255, 255, 0) 68%),
+    url('/media/fondos%20login/fondo-light.png') center / cover no-repeat;
+  --lg-text: #0a0a0a;
+  --lg-text-muted: #57575c;
+  --lg-text-faint: #8a8a90;
+  --lg-blend: multiply;
+  --lg-orb-a: rgba(251, 67, 57, 0.5);
+  --lg-orb-b: rgba(229, 50, 43, 0.42);
+  --lg-orb-c: rgba(190, 40, 95, 0.36);
+  --lg-orb-d: rgba(229, 50, 43, 0.4);
+  --lg-orb-e: rgba(210, 45, 70, 0.34);
+  --lg-grid: rgba(10, 10, 10, 0.045);
+  --lg-card-bg: linear-gradient(155deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.6) 100%);
+  --lg-card-border: rgba(10, 10, 10, 0.08);
+  --lg-card-shadow: 0 24px 60px -20px rgba(120, 20, 20, 0.16), 0 2px 8px rgba(10, 10, 10, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --lg-sheen: rgba(255, 255, 255, 0.5);
+  --lg-input-bg: rgba(255, 255, 255, 0.7);
+  --lg-input-border: rgba(10, 10, 10, 0.12);
+  --lg-input-bg-focus: #ffffff;
+  --lg-lockup-x: rgba(10, 10, 10, 0.35);
+  --lg-glow: rgba(251, 67, 57, 0.16);
+  --lg-logo-filter: brightness(0);
+  /* en claro el wordmark negro se queda tal cual */
+  --lg-wordmark-filter: none;
+}
+
+/* Fondo por imagen: se ocultan las capas procedurales (aurora / rejilla / grano
+   / halo). Ver backup en public/media/fondos login/BACKUP-fondo-aurora.md */
+.aurora,
+.grid,
+.grain,
+.formGlow {
+  display: none;
+}
+
+/* ── Panel de marca: transparente, encima del fondo compartido ── */
 .brand {
   position: relative;
-  overflow: hidden;
-  background:
-    radial-gradient(120% 80% at 18% 12%, rgba(251, 67, 57, 0.18) 0%, rgba(251, 67, 57, 0) 55%),
-    radial-gradient(90% 70% at 90% 100%, rgba(251, 67, 57, 0.08) 0%, rgba(0, 0, 0, 0) 60%),
-    #000000;
-  color: #ffffff;
+  z-index: 1;
+  color: var(--lg-text);
   display: flex;
-  border-right: 1px solid #1f1f1f;
+}
+
+/* Aurora: orbes de color desenfocados que flotan lentamente (mesh vivo) */
+.aurora {
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(60px) saturate(130%);
+}
+
+.aurora span {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  mix-blend-mode: var(--lg-blend, screen);
+  will-change: transform;
+}
+
+.orb1 {
+  width: 30%;
+  aspect-ratio: 1;
+  top: 4%;
+  left: 4%;
+  background: radial-gradient(circle at 35% 35%, var(--lg-orb-a), transparent 65%);
+  animation: drift1 18s var(--ease) infinite alternate;
+}
+
+.orb2 {
+  width: 26%;
+  aspect-ratio: 1;
+  bottom: -2%;
+  left: 16%;
+  background: radial-gradient(circle at 50% 50%, var(--lg-orb-b), transparent 64%);
+  animation: drift2 22s var(--ease) infinite alternate;
+}
+
+.orb3 {
+  width: 22%;
+  aspect-ratio: 1;
+  top: 22%;
+  right: 2%;
+  background: radial-gradient(circle at 50% 50%, var(--lg-orb-c), transparent 62%);
+  animation: drift3 26s var(--ease) infinite alternate;
+}
+
+/* Orbes de relleno para dar rojo al centro */
+.orb4 {
+  width: 28%;
+  aspect-ratio: 1;
+  top: 50%;
+  left: 34%;
+  margin-top: -14%; /* centra vertical sin transform (lo usa la animación) */
+  background: radial-gradient(circle at 50% 50%, var(--lg-orb-d), transparent 66%);
+  animation: drift1 20s var(--ease) infinite alternate;
+}
+
+.orb5 {
+  width: 24%;
+  aspect-ratio: 1;
+  top: 12%;
+  left: 44%;
+  background: radial-gradient(circle at 50% 50%, var(--lg-orb-e), transparent 64%);
+  animation: drift3 24s var(--ease) infinite alternate;
+}
+
+@keyframes drift1 {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(12%, 8%, 0) scale(1.12);
+  }
+}
+@keyframes drift2 {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+  to {
+    transform: translate3d(-10%, -10%, 0) scale(0.95);
+  }
+}
+@keyframes drift3 {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-8%, 12%, 0) scale(1.15);
+  }
+}
+
+/* Rejilla técnica muy sutil, con desvanecido hacia los bordes */
+.grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    linear-gradient(var(--lg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--lg-grid) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask-image: radial-gradient(120% 120% at 30% 20%, #000 20%, transparent 75%);
+  mask-image: radial-gradient(120% 120% at 30% 20%, #000 20%, transparent 75%);
 }
 
 /* Grano muy discreto */
 .grain {
   position: absolute;
   inset: 0;
-  opacity: 0.05;
+  z-index: 0;
+  opacity: 0.045;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -38,13 +209,49 @@
   padding: var(--space-7);
 }
 
-.brandLogo {
+/* Lockup de co-marca: Creatiba × Zapata */
+.lockup {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
+}
+
+.logoCreatiba {
+  height: 30px;
+  width: auto;
+  filter: var(--lg-logo-filter);
+}
+
+.logoZapata {
+  height: 19px;
+  width: auto;
+  opacity: 0.92;
+  filter: var(--lg-logo-filter);
+}
+
+.lockupX {
   font-size: var(--text-lg);
+  font-weight: 300;
+  line-height: 1;
+  color: var(--lg-lockup-x);
+}
+
+/* Wordmark Creatiba Studio (grande) en el lado izquierdo */
+.brandWordmark {
+  height: 40px;
+  width: auto;
+  align-self: flex-start;
+  margin-bottom: var(--space-5);
+  filter: var(--lg-wordmark-filter);
+}
+
+.eyebrow {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-xs);
   font-weight: 600;
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
 .headline {
@@ -52,46 +259,217 @@
   font-weight: 600;
   line-height: 1.04;
   letter-spacing: -0.03em;
-  color: #ffffff;
+  color: var(--lg-text);
+}
+
+.headlineAccent {
+  background: linear-gradient(120deg, #ff6a5f 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .brandSub {
   margin-top: var(--space-4);
   max-width: 42ch;
-  color: #a1a1a1;
+  color: var(--lg-text-muted);
   font-size: var(--text-lg);
   line-height: 1.55;
 }
 
 .brandFoot {
-  color: #6b6b6b;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--lg-text-faint);
   font-size: var(--text-sm);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
-/* ── Lado del formulario (sigue el tema) ── */
+.footDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  flex-shrink: 0;
+}
+
+/* ── Lado del formulario: transparente, con tarjeta flotante glass ── */
 .formSide {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6) clamp(var(--space-4), 4vw, var(--space-7));
 }
 
-.formTop {
-  display: flex;
-  justify-content: flex-end;
-  padding: var(--space-5) var(--space-5) 0;
+/* Halo rojo tenue detrás de la tarjeta: da vida al vidrio */
+.formGlow {
+  position: absolute;
+  z-index: 0;
+  width: 460px;
+  height: 460px;
+  border-radius: 50%;
+  left: -120px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  background: radial-gradient(circle, var(--lg-glow) 0%, transparent 68%);
+  filter: blur(30px);
+}
+
+/* Tarjeta de vidrio flotante */
+.card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 20px;
+  padding: clamp(var(--space-5), 4vw, var(--space-7));
+  background: var(--lg-card-bg);
+  border: 1px solid var(--lg-card-border);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  box-shadow: var(--lg-card-shadow);
+  overflow: hidden;
+  animation: cardIn 0.55s var(--ease) both;
+  transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Destello superior sutil sobre el borde de la tarjeta */
+.cardSheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(120% 60% at 50% -10%, var(--lg-sheen) 0%, transparent 60%);
 }
 
 .formInner {
-  flex: 1;
-  width: 100%;
-  max-width: 360px;
-  margin: 0 auto;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: var(--space-6) var(--space-5) var(--space-8);
+}
+
+/* Wordmark Creatiba Studio dentro de la tarjeta */
+.cardWordmark {
+  height: 24px;
+  width: auto;
+  align-self: center; /* centrado, sin stretch del flex-column que deformaba el logo */
+  margin-bottom: var(--space-5);
+  filter: var(--lg-wordmark-filter);
+  animation: brandIn 0.5s var(--ease) both;
+}
+
+@keyframes brandIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Inputs translúcidos para reforzar el look de vidrio (theme-aware) */
+.card :global(.input),
+.card :global(.textarea),
+.card :global(.select) {
+  background: var(--lg-input-bg);
+  border-color: var(--lg-input-border);
+}
+
+.card :global(.input:focus),
+.card :global(.textarea:focus),
+.card :global(.select:focus) {
+  background: var(--lg-input-bg-focus);
+}
+
+/* ── Inputs con icono + micro-interacciones ── */
+.inputWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 0.7rem;
+  display: inline-flex;
+  color: var(--text-faint);
+  pointer-events: none;
+  transition: color var(--dur-fast) var(--ease), transform var(--dur) var(--ease);
+}
+
+.inputWrap:focus-within .inputIcon {
+  color: var(--accent);
+  transform: scale(1.08);
+}
+
+.iconInput {
+  padding-left: 2.35rem;
+}
+
+.pwInput {
+  padding-right: 2.6rem;
+}
+
+/* Botón ver/ocultar contraseña */
+.toggleBtn {
+  position: absolute;
+  right: 0.4rem;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+
+.toggleBtn:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.toggleBtn:active {
+  transform: scale(0.9);
+}
+
+/* Botón de envío: flecha que se desliza al hover */
+.submit {
+  width: 100%;
+  height: 40px;
+}
+
+.submit svg {
+  transition: transform var(--dur) var(--ease);
+}
+
+.submit:hover:not(:disabled) svg {
+  transform: translateX(4px);
+}
+
+.submit:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .formTitle {
@@ -112,12 +490,24 @@
 }
 
 .link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   color: var(--accent);
   font-weight: 500;
   text-decoration: none;
 }
+
+.link svg {
+  transition: transform var(--dur) var(--ease);
+}
+
 .link:hover {
   text-decoration: underline;
+}
+
+.link:hover svg {
+  transform: translateX(3px);
 }
 
 .error {
@@ -136,6 +526,34 @@
   border-radius: var(--radius-pill);
   border: 2px solid color-mix(in srgb, var(--accent-contrast) 40%, transparent);
   border-top-color: var(--accent-contrast);
+}
+
+/* Toggle de tema flotante sobre el fondo inmersivo */
+.themeToggleFloat {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-5);
+  z-index: 3;
+}
+
+/* Sin fondo ni borde: solo el icono, más grande (solo en login) */
+.themeToggleFloat :global(.icon-btn) {
+  width: auto;
+  height: auto;
+  padding: 6px;
+  border: none;
+  background: transparent;
+  color: var(--lg-text);
+}
+
+.themeToggleFloat :global(.icon-btn:hover) {
+  background: transparent;
+  color: var(--accent);
+}
+
+.themeToggleFloat :global(.icon-btn svg) {
+  width: 26px;
+  height: 26px;
 }
 
 @media (max-width: 820px) {

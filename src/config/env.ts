@@ -32,7 +32,8 @@ const serverEnvSchema = z.object({
 
   // Modelos de Gemini (proveedor activo), config-driven.
   GEMINI_MODEL_TEXT: stringWithDefault('gemini-2.5-flash'),
-  GEMINI_MODEL_IMAGE: stringWithDefault('imagen-3.0-generate-002'),
+  GEMINI_MODEL_IMAGE: stringWithDefault('imagen-4.0-generate-001'),
+  GEMINI_MODEL_IMAGE_EDIT: stringWithDefault('gemini-2.5-flash-image'),
 
   // Modelos Claude (INACTIVOS en modo arranque; definidos para reactivar).
   AI_MODEL_HIGH: stringWithDefault('claude-opus-4-8'),

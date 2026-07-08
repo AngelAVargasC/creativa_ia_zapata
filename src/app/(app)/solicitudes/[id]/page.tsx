@@ -1,14 +1,17 @@
+import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { resolveSession } from '@/core/auth/resolve-session';
 import { isStaffRole } from '@/core/tenant';
 import { getSolicitud, listEventos } from '@/modules/solicitudes/repository';
-import { STATUS_ORDER, STATUS_META, fieldLabel } from '@/modules/solicitudes/labels';
+import { fieldLabel, STATUS_META } from '@/modules/solicitudes/labels';
 import { formatDateTime } from '@/modules/solicitudes/format';
 import type { SolicitudEvento, SolicitudWithAgency } from '@/modules/solicitudes/types';
 import { PageHeader } from '@/components/shell/page-header';
+import { SparklesIcon } from '@/components/shell/icons';
 import { FadeIn } from '@/components/shell/fade-in';
 import { StatusBadge } from '@/components/solicitudes/status-badge';
+import { StatusControl } from './status-control';
 import { updateSolicitudAction, deleteSolicitudAction } from '../actions';
 import styles from '../solicitudes.module.css';
 import shell from '@/components/shell/shell.module.css';
@@ -21,7 +24,6 @@ const ROLE_LABEL: Record<string, string> = {
 
 const pautaLabel = (v: string | null): string => (v === 'pauta' ? 'Pauta' : v === 'feed' ? 'Feed' : '—');
 
-/** Texto legible de un valor de campo en la bitacora (status/pauta a etiqueta). */
 const displayValue = (field: string | null, value: string | null): string => {
   if (!value) return '—';
   if (field === 'status') return STATUS_META[value as keyof typeof STATUS_META]?.label ?? value;
@@ -56,8 +58,7 @@ export default async function SolicitudDetailPage({
   const eventosRes = await listEventos(id);
   const eventos = eventosRes.ok ? eventosRes.value : [];
 
-  const canEditOwn = !staff && s.status === 'nueva';
-  const target = `/solicitudes/${id}` as Route;
+  const canEditData = staff || s.status === 'nueva';
 
   return (
     <>
@@ -88,29 +89,63 @@ export default async function SolicitudDetailPage({
         )}
 
         <div className={styles.detailGrid}>
-          {/* ── Columna principal: datos + edicion ── */}
-          <FadeIn delay={0.04}>
-            <section className={`card ${styles.panel}`}>
-              <h2 className={styles.panelTitle}>Detalle</h2>
+          {/* ── Columna principal ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+            {/* Gestión del operador: estatus + link, arriba y visible */}
+            {staff && (
+              <FadeIn delay={0.03}>
+                <section className={`card ${styles.gestionCard}`}>
+                  <div className={styles.gestionHead}>
+                    <span className={styles.sectionLabel}>Gestión</span>
+                    <Link className="btn btn-primary" href={`/solicitudes/${s.id}/post` as Route}>
+                      <SparklesIcon size={16} />
+                      Generar post
+                    </Link>
+                  </div>
+                  <StatusControl id={s.id} status={s.status} linkFinal={s.link_final} />
+                </section>
+              </FadeIn>
+            )}
 
-              {staff ? (
-                <StaffForm solicitud={s} target={target} />
-              ) : canEditOwn ? (
-                <SolicitanteForm solicitud={s} target={target} />
-              ) : (
-                <ReadOnlyView solicitud={s} />
-              )}
+            {/* Estatus visible para la agencia (solo lectura) */}
+            {!staff && (
+              <FadeIn delay={0.03}>
+                <section className={`card ${styles.gestionCard}`}>
+                  <span className={styles.sectionLabel}>Estatus de tu solicitud</span>
+                  <div className={styles.metaRow}>
+                    <StatusBadge status={s.status} />
+                    {s.link_final ? (
+                      <a href={s.link_final} target="_blank" rel="noreferrer noopener">
+                        Ver posteo final
+                      </a>
+                    ) : (
+                      <span className="hint">Aún sin link final.</span>
+                    )}
+                  </div>
+                </section>
+              </FadeIn>
+            )}
 
-              {!staff && !canEditOwn && (
-                <p className="hint">
-                  Esta solicitud ya está en proceso; para cambios contacta al equipo. Solo puedes editar mientras
-                  está «Nueva».
-                </p>
-              )}
-            </section>
-          </FadeIn>
+            {/* Datos de la solicitud */}
+            <FadeIn delay={0.06}>
+              <section className={`card ${styles.panel}`}>
+                <h2 className={styles.panelTitle}>Datos de la solicitud</h2>
+                {canEditData ? (
+                  <DataForm solicitud={s} staff={staff} />
+                ) : (
+                  <>
+                    <ReadOnlyView solicitud={s} />
+                    <p className="hint">
+                      Esta solicitud ya está en proceso; solo puedes editarla mientras está «Nueva». Para cambios,
+                      contacta al equipo.
+                    </p>
+                  </>
+                )}
+              </section>
+            </FadeIn>
+          </div>
 
-          {/* ── Columna lateral: bitacora ── */}
+          {/* ── Bitácora ── */}
           <FadeIn delay={0.1}>
             <section className={`card ${styles.panel}`}>
               <h2 className={styles.panelTitle}>Historial de cambios</h2>
@@ -138,7 +173,7 @@ export default async function SolicitudDetailPage({
   );
 }
 
-/* ── Vista de solo lectura (agencia con solicitud ya en proceso) ── */
+/* ── Vista de solo lectura ── */
 function ReadOnlyView({ solicitud: s }: { readonly solicitud: SolicitudWithAgency }) {
   return (
     <dl className={styles.dl}>
@@ -158,30 +193,12 @@ function ReadOnlyView({ solicitud: s }: { readonly solicitud: SolicitudWithAgenc
         <dt>Segmentación geográfica</dt>
         <dd>{s.segmentacion_geografica || '—'}</dd>
       </div>
-      <div>
-        <dt>Link final</dt>
-        <dd>
-          {s.link_final ? (
-            <a href={s.link_final} target="_blank" rel="noreferrer noopener">
-              {s.link_final}
-            </a>
-          ) : (
-            '—'
-          )}
-        </dd>
-      </div>
     </dl>
   );
 }
 
-/* ── Formulario del solicitante (solo sus campos, solo si 'nueva') ── */
-function SolicitanteForm({
-  solicitud: s,
-  target,
-}: {
-  readonly solicitud: SolicitudWithAgency;
-  readonly target: string;
-}) {
+/* ── Formulario de datos (agencia mientras «nueva», o correcciones del staff) ── */
+function DataForm({ solicitud: s, staff }: { readonly solicitud: SolicitudWithAgency; readonly staff: boolean }) {
   return (
     <form action={updateSolicitudAction} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
       <input type="hidden" name="id" value={s.id} />
@@ -221,99 +238,13 @@ function SolicitanteForm({
         />
       </label>
       <div className={styles.actions}>
-        <DeleteButton id={s.id} target={target} />
+        <button className="btn btn-ghost" type="submit" formAction={deleteSolicitudAction}>
+          Eliminar
+        </button>
         <button className="btn btn-primary" type="submit">
-          Guardar cambios
+          {staff ? 'Guardar datos' : 'Guardar cambios'}
         </button>
       </div>
     </form>
-  );
-}
-
-/* ── Formulario de staff (status + link_final + datos) ── */
-function StaffForm({
-  solicitud: s,
-  target,
-}: {
-  readonly solicitud: SolicitudWithAgency;
-  readonly target: string;
-}) {
-  return (
-    <form action={updateSolicitudAction} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-      <input type="hidden" name="id" value={s.id} />
-      <div className={styles.row}>
-        <label className="field">
-          <span className="field-label">Estatus</span>
-          <select className="select" name="status" defaultValue={s.status}>
-            {STATUS_ORDER.map((st) => (
-              <option key={st} value={st}>
-                {STATUS_META[st].label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span className="field-label">¿Pauta o feed?</span>
-          <select className="select" name="pauta_o_feed" defaultValue={s.pauta_o_feed ?? ''}>
-            <option value="">Sin especificar</option>
-            <option value="feed">Feed</option>
-            <option value="pauta">Pauta</option>
-          </select>
-        </label>
-      </div>
-
-      <label className="field">
-        <span className="field-label">Link final</span>
-        <input
-          className="input"
-          name="link_final"
-          type="url"
-          defaultValue={s.link_final}
-          placeholder="https://… (posteo listo para publicar)"
-        />
-      </label>
-
-      <label className="field">
-        <span className="field-label">Tipo de contenido</span>
-        <input className="input" name="tipo_contenido" defaultValue={s.tipo_contenido} required />
-      </label>
-      <label className="field">
-        <span className="field-label">Descripción</span>
-        <textarea className="textarea" name="descripcion" defaultValue={s.descripcion} />
-      </label>
-      <label className="field">
-        <span className="field-label">Información</span>
-        <textarea className="textarea" name="informacion" defaultValue={s.informacion} />
-      </label>
-      <label className="field">
-        <span className="field-label">Insumos</span>
-        <textarea className="textarea" name="insumos" defaultValue={s.insumos} style={{ minHeight: 64 }} />
-      </label>
-      <label className="field">
-        <span className="field-label">Segmentación geográfica</span>
-        <textarea
-          className="textarea"
-          name="segmentacion_geografica"
-          defaultValue={s.segmentacion_geografica}
-          style={{ minHeight: 64 }}
-        />
-      </label>
-
-      <div className={styles.actions}>
-        <DeleteButton id={s.id} target={target} />
-        <button className="btn btn-primary" type="submit">
-          Guardar cambios
-        </button>
-      </div>
-    </form>
-  );
-}
-
-/* ── Boton de eliminar: reenvia el mismo form (con el id oculto) a la accion de borrado ── */
-function DeleteButton({ id: _id }: { readonly id: string; readonly target: string }) {
-  return (
-    <button className="btn btn-ghost" type="submit" formAction={deleteSolicitudAction}>
-      Eliminar
-    </button>
   );
 }

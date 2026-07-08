@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import type { AppRole } from '@/core/tenant';
 import { Sidebar } from './sidebar';
-import { LogoMark, MenuIcon } from './icons';
+import { Topbar } from './topbar';
 import styles from './shell.module.css';
 
 interface AppShellProps {
@@ -42,22 +42,14 @@ export const AppShell = ({ user, children }: AppShellProps) => {
       {mobileOpen && <div className={styles.scrim} onClick={() => setMobileOpen(false)} aria-hidden="true" />}
 
       <div className={styles.main}>
-        <div className={styles.mobileBar}>
-          <button type="button" className="icon-btn" onClick={() => setMobileOpen(true)} aria-label="Abrir menú">
-            <MenuIcon />
-          </button>
-          <span className={styles.mobileBrand}>
-            <LogoMark size={20} />
-            Creatiba
-          </span>
-        </div>
+        <Topbar onOpenMenu={() => setMobileOpen(true)} />
 
         <motion.main
           key={pathname}
           className={styles.content}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: [0.22, 0.61, 0.36, 1] }}
         >
           {children}
         </motion.main>

@@ -1,9 +1,21 @@
 .formCard {
-  max-width: 720px;
+  width: 100%;
   padding: var(--space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4) var(--space-5);
+  align-items: start;
+}
+
+/* Campo que ocupa las dos columnas (selects grandes, textareas, avisos) */
+.full {
+  grid-column: 1 / -1;
+}
+
+/* Compacta un poco los campos dentro del grid */
+.formCard :global(.field) {
+  min-width: 0;
+  gap: var(--space-1);
 }
 
 .row {
@@ -13,6 +25,7 @@
 }
 
 .actions {
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -35,6 +48,49 @@
   color: #16a34a;
   background: color-mix(in srgb, #16a34a 12%, transparent);
   border-color: color-mix(in srgb, #16a34a 32%, transparent);
+}
+
+/* ── Panel de gestión del operador (estatus + link, arriba y visible) ── */
+.gestion {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: var(--space-4);
+  align-items: start;
+}
+.inlineField {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+.inlineField .input {
+  flex: 1;
+}
+.gestionCard {
+  padding: var(--space-5);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+  background: color-mix(in srgb, var(--accent) 4%, var(--surface-1));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.sectionLabel {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  font-weight: 600;
+}
+.gestionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+@media (max-width: 720px) {
+  .gestion {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ── Detalle ── */
@@ -130,6 +186,9 @@
     grid-template-columns: 1fr;
   }
   .row {
+    grid-template-columns: 1fr;
+  }
+  .formCard {
     grid-template-columns: 1fr;
   }
 }

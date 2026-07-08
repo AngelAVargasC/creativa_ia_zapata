@@ -5,9 +5,9 @@ export const STATUS_META: Record<SolicitudStatus, { readonly label: string; read
   nueva: { label: 'Nueva', tone: 'neutral' },
   en_proceso: { label: 'En proceso', tone: 'info' },
   en_revision: { label: 'En revisión', tone: 'warn' },
-  requiere_info: { label: 'Requiere info', tone: 'warn' },
+  requiere_info: { label: 'Requiere info', tone: 'danger' },
   lista: { label: 'Lista', tone: 'ok' },
-  publicada: { label: 'Publicada', tone: 'ok' },
+  publicada: { label: 'Publicada', tone: 'info' },
   cancelada: { label: 'Cancelada', tone: 'muted' },
 };
 

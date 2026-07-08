@@ -50,9 +50,12 @@ export const createR2StorageAdapter = (deps: R2Deps): StoragePort => {
   const bucket = env.R2_BUCKET;
   const publicBase = env.R2_PUBLIC_BASE_URL;
 
+  // Acepta el account id "pelón" o el endpoint completo pegado por error.
+  const accountId = env.R2_ACCOUNT_ID.replace(/^https?:\/\//, '').split('.')[0];
+
   const client = new S3Client({
     region: 'auto',
-    endpoint: `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
     credentials: {
       accessKeyId: env.R2_ACCESS_KEY_ID,
       secretAccessKey: env.R2_SECRET_ACCESS_KEY,

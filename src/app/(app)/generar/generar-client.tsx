@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateCopyRequestSchema } from '@/modules/content-generation/schema';
-import { SparklesIcon } from '@/components/shell/icons';
+import { SparklesIcon, AlertTriangleIcon } from '@/components/shell/icons';
 import styles from './generar.module.css';
 
 type Platform = 'facebook' | 'instagram';
@@ -397,7 +397,7 @@ export const GenerarClient = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <span aria-hidden="true">⚠</span>
+                <AlertTriangleIcon size={16} />
                 <span>
                   <strong>No se pudo generar. </strong>
                   {error}

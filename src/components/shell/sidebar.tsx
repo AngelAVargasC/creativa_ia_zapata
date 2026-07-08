@@ -13,8 +13,9 @@ import {
   ChevronLeftIcon,
   ClipboardIcon,
   DeckIcon,
+  HomeIcon,
+  ImageIcon,
   LibraryIcon,
-  LogoMark,
   LogoutIcon,
   PlusIcon,
   SparklesIcon,
@@ -40,8 +41,14 @@ const ROLE_LABEL: Record<AppRole, string> = {
 
 /** Navegacion segun rol: la agencia solo ve sus solicitudes; el staff gestiona. */
 const navFor = (role: AppRole): readonly NavGroup[] => {
+  const inicio: NavGroup = {
+    label: '',
+    items: [{ label: 'Inicio', href: '/inicio', icon: <HomeIcon /> }],
+  };
+
   if (role === 'solicitante') {
     return [
+      inicio,
       {
         label: 'Solicitudes',
         items: [
@@ -53,6 +60,7 @@ const navFor = (role: AppRole): readonly NavGroup[] => {
   }
 
   const groups: NavGroup[] = [
+    inicio,
     {
       label: 'Operación',
       items: [{ label: 'Solicitudes', href: '/solicitudes', icon: <ClipboardIcon /> }],
@@ -60,6 +68,7 @@ const navFor = (role: AppRole): readonly NavGroup[] => {
     {
       label: 'Crear',
       items: [
+        { label: 'Estudio de post', href: '/estudio', icon: <ImageIcon /> },
         { label: 'Generar contenido', href: '/generar', icon: <SparklesIcon /> },
         { label: 'Propuestas', href: '/propuestas', icon: <DeckIcon /> },
       ],
@@ -108,9 +117,9 @@ export const Sidebar = ({ user, collapsed, mobileOpen, onToggleCollapse }: Sideb
   return (
     <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`} data-open={mobileOpen}>
       <div className={styles.sidebarHeader}>
-        <Link href={'/generar' as Route} className={styles.logo} aria-label="Creatiba — inicio">
-          <LogoMark />
-          <span className={styles.logoText}>Creatiba</span>
+        <Link href={'/generar' as Route} className={styles.logo} aria-label="Creatiba Studio — inicio">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/media/creatiba-studio-wordmark.png" alt="Creatiba Studio" className={styles.logoImg} />
         </Link>
         <button
           type="button"
@@ -124,8 +133,8 @@ export const Sidebar = ({ user, collapsed, mobileOpen, onToggleCollapse }: Sideb
 
       <motion.nav className={styles.nav} variants={container} initial="hidden" animate="show">
         {nav.map((group) => (
-          <div className={styles.navGroup} key={group.label}>
-            <p className={styles.navGroupLabel}>{group.label}</p>
+          <div className={styles.navGroup} key={group.label || 'inicio'}>
+            {group.label && <p className={styles.navGroupLabel}>{group.label}</p>}
             {group.items.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (
