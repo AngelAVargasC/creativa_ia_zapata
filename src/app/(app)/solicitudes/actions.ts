@@ -19,9 +19,9 @@ import {
 
 /** Normaliza un campo de texto del form (null/'' -> ''). */
 const str = (v: FormDataEntryValue | null): string => (typeof v === 'string' ? v : '');
-/** Campo opcional 'pauta'|'feed' (o undefined si vacio). */
-const optPauta = (v: FormDataEntryValue | null): 'pauta' | 'feed' | undefined =>
-  v === 'pauta' || v === 'feed' ? v : undefined;
+/** Texto opcional del form: undefined si el campo no vino, string (incl. '') si vino. */
+const optStr = (fd: FormData, key: string): string | undefined =>
+  fd.get(key) === null ? undefined : str(fd.get(key));
 
 /**
  * Crea una solicitud. El solicitante la crea para SU agencia; el staff puede
@@ -36,7 +36,7 @@ export const createSolicitudAction = async (formData: FormData): Promise<void> =
     descripcion: str(formData.get('descripcion')),
     informacion: str(formData.get('informacion')),
     insumos: str(formData.get('insumos')),
-    pauta_o_feed: optPauta(formData.get('pauta_o_feed')),
+    formato: str(formData.get('formato')),
     segmentacion_geografica: str(formData.get('segmentacion_geografica')),
   });
   if (!parsed.success) redirect('/solicitudes/nueva?error=invalid' as Route);
@@ -69,16 +69,16 @@ export const updateSolicitudAction = async (formData: FormData): Promise<void> =
   if (staff) {
     const parsed = staffUpdateSchema.safeParse({
       status: str(formData.get('status')) || undefined,
-      link_final: formData.get('link_final') === null ? undefined : str(formData.get('link_final')),
+      link_final: optStr(formData, 'link_final'),
       tipo_contenido: str(formData.get('tipo_contenido')) || undefined,
-      descripcion: formData.get('descripcion') === null ? undefined : str(formData.get('descripcion')),
-      informacion: formData.get('informacion') === null ? undefined : str(formData.get('informacion')),
-      insumos: formData.get('insumos') === null ? undefined : str(formData.get('insumos')),
-      pauta_o_feed: optPauta(formData.get('pauta_o_feed')),
-      segmentacion_geografica:
-        formData.get('segmentacion_geografica') === null
-          ? undefined
-          : str(formData.get('segmentacion_geografica')),
+      descripcion: optStr(formData, 'descripcion'),
+      informacion: optStr(formData, 'informacion'),
+      insumos: optStr(formData, 'insumos'),
+      formato: optStr(formData, 'formato'),
+      segmentacion_geografica: optStr(formData, 'segmentacion_geografica'),
+      comentarios: optStr(formData, 'comentarios'),
+      copy_out: optStr(formData, 'copy_out'),
+      pautado: formData.get('pautado') === null ? undefined : formData.get('pautado') === 'true',
     });
     if (!parsed.success) redirect(`${target}?error=invalid` as Route);
     const res = await updateSolicitudStaff(id, parsed.data);
@@ -86,14 +86,11 @@ export const updateSolicitudAction = async (formData: FormData): Promise<void> =
   } else {
     const parsed = solicitanteUpdateSchema.safeParse({
       tipo_contenido: str(formData.get('tipo_contenido')) || undefined,
-      descripcion: formData.get('descripcion') === null ? undefined : str(formData.get('descripcion')),
-      informacion: formData.get('informacion') === null ? undefined : str(formData.get('informacion')),
-      insumos: formData.get('insumos') === null ? undefined : str(formData.get('insumos')),
-      pauta_o_feed: optPauta(formData.get('pauta_o_feed')),
-      segmentacion_geografica:
-        formData.get('segmentacion_geografica') === null
-          ? undefined
-          : str(formData.get('segmentacion_geografica')),
+      descripcion: optStr(formData, 'descripcion'),
+      informacion: optStr(formData, 'informacion'),
+      insumos: optStr(formData, 'insumos'),
+      formato: optStr(formData, 'formato'),
+      segmentacion_geografica: optStr(formData, 'segmentacion_geografica'),
     });
     if (!parsed.success) redirect(`${target}?error=invalid` as Route);
     const res = await updateSolicitudSolicitante(id, parsed.data);

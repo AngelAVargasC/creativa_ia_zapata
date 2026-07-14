@@ -26,7 +26,7 @@ export default async function SolicitudesPage({
   const all = res.ok ? res.value : [];
   const rows = query
     ? all.filter((s) =>
-        [s.agencia_nombre, s.tipo_contenido, s.pauta_o_feed ?? '', s.descripcion ?? '']
+        [s.agencia_nombre, s.tipo_contenido, s.formato ?? '', s.descripcion ?? '']
           .join(' ')
           .toLowerCase()
           .includes(query),
@@ -75,7 +75,7 @@ export default async function SolicitudesPage({
                   <tr>
                     {staff && <th>Agencia</th>}
                     <th>Tipo de contenido</th>
-                    <th>Pauta / Feed</th>
+                    <th>Formato</th>
                     <th>Estatus</th>
                     <th>Actualizada</th>
                     <th>Link final</th>
@@ -96,7 +96,7 @@ export default async function SolicitudesPage({
                           {s.tipo_contenido}
                         </Link>
                       </td>
-                      <td>{s.pauta_o_feed ? (s.pauta_o_feed === 'pauta' ? 'Pauta' : 'Feed') : '—'}</td>
+                      <td>{s.formato || '—'}</td>
                       <td>
                         <StatusBadge status={s.status} />
                       </td>

@@ -4,7 +4,7 @@ import { notFound, redirect } from 'next/navigation';
 import { resolveSession } from '@/core/auth/resolve-session';
 import { isStaffRole } from '@/core/tenant';
 import { getSolicitud, listEventos } from '@/modules/solicitudes/repository';
-import { fieldLabel, STATUS_META } from '@/modules/solicitudes/labels';
+import { fieldLabel, statusLabel, TIPO_CONTENIDO_SUGERENCIAS, FORMATO_SUGERENCIAS } from '@/modules/solicitudes/labels';
 import { formatDateTime } from '@/modules/solicitudes/format';
 import type { SolicitudEvento, SolicitudWithAgency } from '@/modules/solicitudes/types';
 import { PageHeader } from '@/components/shell/page-header';
@@ -22,12 +22,10 @@ const ROLE_LABEL: Record<string, string> = {
   solicitante: 'Agencia',
 };
 
-const pautaLabel = (v: string | null): string => (v === 'pauta' ? 'Pauta' : v === 'feed' ? 'Feed' : '—');
-
 const displayValue = (field: string | null, value: string | null): string => {
   if (!value) return '—';
-  if (field === 'status') return STATUS_META[value as keyof typeof STATUS_META]?.label ?? value;
-  if (field === 'pauta_o_feed') return pautaLabel(value);
+  if (field === 'status') return statusLabel(value).label;
+  if (field === 'pautado') return value === 'true' ? 'Sí' : 'No';
   return value;
 };
 
@@ -65,7 +63,7 @@ export default async function SolicitudDetailPage({
       <FadeIn y={6}>
         <PageHeader
           title={s.tipo_contenido}
-          description={`${s.agencia_nombre} · ${pautaLabel(s.pauta_o_feed)}`}
+          description={`${s.agencia_nombre}${s.formato ? ` · ${s.formato}` : ''}`}
           actions={<StatusBadge status={s.status} />}
         />
       </FadeIn>
@@ -190,9 +188,19 @@ function ReadOnlyView({ solicitud: s }: { readonly solicitud: SolicitudWithAgenc
         <dd>{s.insumos || '—'}</dd>
       </div>
       <div>
+        <dt>Formato</dt>
+        <dd>{s.formato || '—'}</dd>
+      </div>
+      <div>
         <dt>Segmentación geográfica</dt>
         <dd>{s.segmentacion_geografica || '—'}</dd>
       </div>
+      {s.copy_out && (
+        <div>
+          <dt>Copy final</dt>
+          <dd>{s.copy_out}</dd>
+        </div>
+      )}
     </dl>
   );
 }
@@ -205,15 +213,21 @@ function DataForm({ solicitud: s, staff }: { readonly solicitud: SolicitudWithAg
       <div className={styles.row}>
         <label className="field">
           <span className="field-label">Tipo de contenido</span>
-          <input className="input" name="tipo_contenido" defaultValue={s.tipo_contenido} required />
+          <input className="input" name="tipo_contenido" list="tipos-det" defaultValue={s.tipo_contenido} required />
+          <datalist id="tipos-det">
+            {TIPO_CONTENIDO_SUGERENCIAS.map((t) => (
+              <option key={t} value={t} />
+            ))}
+          </datalist>
         </label>
         <label className="field">
-          <span className="field-label">¿Pauta o feed?</span>
-          <select className="select" name="pauta_o_feed" defaultValue={s.pauta_o_feed ?? ''}>
-            <option value="">Sin especificar</option>
-            <option value="feed">Feed</option>
-            <option value="pauta">Pauta</option>
-          </select>
+          <span className="field-label">Formato</span>
+          <input className="input" name="formato" list="formatos-det" defaultValue={s.formato} placeholder="Feed, Pauta, Story…" />
+          <datalist id="formatos-det">
+            {FORMATO_SUGERENCIAS.map((f) => (
+              <option key={f} value={f} />
+            ))}
+          </datalist>
         </label>
       </div>
       <label className="field">
@@ -237,6 +251,27 @@ function DataForm({ solicitud: s, staff }: { readonly solicitud: SolicitudWithAg
           style={{ minHeight: 64 }}
         />
       </label>
+
+      {staff && (
+        <>
+          <label className="field">
+            <span className="field-label">Copy out (copy entregado)</span>
+            <textarea className="textarea" name="copy_out" defaultValue={s.copy_out} placeholder="Copy/caption final que se entrega…" />
+          </label>
+          <label className="field">
+            <span className="field-label">Comentarios (internos)</span>
+            <textarea className="textarea" name="comentarios" defaultValue={s.comentarios} style={{ minHeight: 64 }} />
+          </label>
+          <label className="field">
+            <span className="field-label">¿Pautado?</span>
+            <select className="select" name="pautado" defaultValue={s.pautado ? 'true' : 'false'}>
+              <option value="false">No</option>
+              <option value="true">Sí, se pautó</option>
+            </select>
+          </label>
+        </>
+      )}
+
       <div className={styles.actions}>
         <button className="btn btn-ghost" type="submit" formAction={deleteSolicitudAction}>
           Eliminar

@@ -6,6 +6,7 @@ import { getSupabaseServerClient } from '@/db/supabase-server';
 import { PageHeader } from '@/components/shell/page-header';
 import { FadeIn } from '@/components/shell/fade-in';
 import { createSolicitudAction } from '../actions';
+import { TIPO_CONTENIDO_SUGERENCIAS, FORMATO_SUGERENCIAS } from '@/modules/solicitudes/labels';
 import styles from '../solicitudes.module.css';
 import shell from '@/components/shell/shell.module.css';
 
@@ -78,23 +79,22 @@ export default async function NuevaSolicitudPage({
                 required
               />
               <datalist id="tipos-contenido">
-                <option value="Posteo de feed" />
-                <option value="Story" />
-                <option value="Reel" />
-                <option value="Edición de microperforados" />
-                <option value="Diseño para impresión" />
+                {TIPO_CONTENIDO_SUGERENCIAS.map((t) => (
+                  <option key={t} value={t} />
+                ))}
               </datalist>
               <span className="hint">Qué pieza necesitas. Elige una sugerencia o escribe la tuya.</span>
             </label>
 
             <label className="field">
-              <span className="field-label">¿Pauta o feed?</span>
-              <select className="select" name="pauta_o_feed" defaultValue="">
-                <option value="">Sin especificar</option>
-                <option value="feed">Feed (publicación orgánica)</option>
-                <option value="pauta">Pauta (anuncio pagado)</option>
-              </select>
-              <span className="hint">Feed = va al perfil. Pauta = campaña pagada.</span>
+              <span className="field-label">Formato</span>
+              <input className="input" name="formato" list="formatos" placeholder="Feed, Pauta, Story…" />
+              <datalist id="formatos">
+                {FORMATO_SUGERENCIAS.map((f) => (
+                  <option key={f} value={f} />
+                ))}
+              </datalist>
+              <span className="hint">Destino/formato de salida (opcional).</span>
             </label>
 
             <label className="field">

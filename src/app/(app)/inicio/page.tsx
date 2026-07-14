@@ -53,8 +53,8 @@ const agencyActions: readonly QuickAction[] = [
   { href: '/solicitudes', title: 'Mis solicitudes', desc: 'Sigue el estatus de cada una', icon: <ClipboardIcon /> },
 ];
 
-const IN_PROGRESS: readonly SolicitudStatus[] = ['nueva', 'en_proceso', 'en_revision', 'requiere_info', 'lista'];
-const NEEDS_ATTENTION: readonly SolicitudStatus[] = ['en_revision', 'requiere_info'];
+const IN_PROGRESS: readonly SolicitudStatus[] = ['nueva', 'en_correccion', 'en_produccion', 'esperando_aprobacion', 'lista'];
+const NEEDS_ATTENTION: readonly SolicitudStatus[] = ['en_correccion', 'esperando_aprobacion'];
 
 const POST_STATUS: Record<string, { readonly label: string; readonly tone: string }> = {
   borrador: { label: 'Borrador', tone: 'muted' },

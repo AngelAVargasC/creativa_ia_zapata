@@ -1,19 +1,19 @@
 import { z } from 'zod';
 
-/** Enums espejo de los tipos SQL (migracion 0003). */
-export const pautaOFeedSchema = z.enum(['pauta', 'feed']);
-export type PautaOFeed = z.infer<typeof pautaOFeedSchema>;
-
+/** Catálogo de estatus (flujo real del equipo). Se valida aquí; en la BD es texto. */
 export const solicitudStatusSchema = z.enum([
   'nueva',
-  'en_proceso',
-  'en_revision',
-  'requiere_info',
+  'en_correccion',
+  'en_produccion',
+  'esperando_aprobacion',
   'lista',
   'publicada',
   'cancelada',
 ]);
 export type SolicitudStatus = z.infer<typeof solicitudStatusSchema>;
+
+/** Formato de salida (texto libre con sugerencias): Feed, Pauta, Story, Reel… */
+export const formatoSchema = z.string().trim().max(60);
 
 /** Alta de solicitud (lo que llena la agencia). Mapea las columnas del Excel. */
 export const createSolicitudSchema = z.object({
@@ -21,7 +21,7 @@ export const createSolicitudSchema = z.object({
   descripcion: z.string().trim().max(2000).default(''),
   informacion: z.string().trim().max(4000).default(''),
   insumos: z.string().trim().max(2000).default(''),
-  pauta_o_feed: pautaOFeedSchema.optional(),
+  formato: formatoSchema.default(''),
   segmentacion_geografica: z.string().trim().max(500).default(''),
 });
 export type CreateSolicitudInput = z.infer<typeof createSolicitudSchema>;
@@ -30,7 +30,7 @@ export type CreateSolicitudInput = z.infer<typeof createSolicitudSchema>;
 export const solicitanteUpdateSchema = createSolicitudSchema.partial();
 export type SolicitanteUpdateInput = z.infer<typeof solicitanteUpdateSchema>;
 
-/** Edicion de staff (operador/admin): status, link_final y correccion de datos. */
+/** Edicion de staff (operador/admin): status, entrega y correccion de datos. */
 export const staffUpdateSchema = z.object({
   status: solicitudStatusSchema.optional(),
   link_final: z.string().trim().max(1000).optional(),
@@ -38,7 +38,10 @@ export const staffUpdateSchema = z.object({
   descripcion: z.string().trim().max(2000).optional(),
   informacion: z.string().trim().max(4000).optional(),
   insumos: z.string().trim().max(2000).optional(),
-  pauta_o_feed: pautaOFeedSchema.optional(),
+  formato: formatoSchema.optional(),
   segmentacion_geografica: z.string().trim().max(500).optional(),
+  comentarios: z.string().trim().max(2000).optional(),
+  copy_out: z.string().trim().max(4000).optional(),
+  pautado: z.boolean().optional(),
 });
 export type StaffUpdateInput = z.infer<typeof staffUpdateSchema>;

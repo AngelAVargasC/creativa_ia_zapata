@@ -1,4 +1,4 @@
-import type { PautaOFeed, SolicitudStatus } from './schema';
+import type { SolicitudStatus } from './schema';
 
 /** Fila de `public.solicitudes`. */
 export interface SolicitudRow {
@@ -8,10 +8,13 @@ export interface SolicitudRow {
   readonly descripcion: string;
   readonly informacion: string;
   readonly insumos: string;
-  readonly pauta_o_feed: PautaOFeed | null;
+  readonly formato: string;
   readonly segmentacion_geografica: string;
   readonly status: SolicitudStatus;
   readonly link_final: string;
+  readonly comentarios: string;
+  readonly copy_out: string;
+  readonly pautado: boolean;
   readonly created_by: string;
   readonly created_at: string;
   readonly updated_by: string | null;
